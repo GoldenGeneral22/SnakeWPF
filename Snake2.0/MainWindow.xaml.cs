@@ -10,35 +10,23 @@ namespace Snake2._0
 {
     public partial class MainWindow : Window
     {
-        DispatcherTimer timer = new DispatcherTimer();
-        Random random = new Random();
+        readonly DispatcherTimer timer = new DispatcherTimer();
+        readonly Random random = new Random();
         public enum Direction { Left, Right, Up, Down }
-        Direction directionPlayer = Direction.Right;
-        Direction directionOld = Direction.Right;
+        Direction directionPlayer = Direction.Right, directionOld = Direction.Right;
 
-        int snakeLength = 2, mode = 2, scoreValue = 0;
+        int snakeLength = 2, mode = 2, scoreValue = 0, highscore = 0;
 
         string? remainderText, qoutientText;
 
         float timerOfTime, timeSpeed = 0.125f;
 
-        int highscore = 0;
-
         bool alreadyPlaying = false;
 
-        Vector newPosition;
-        Vector positionPlayer;
-        Vector positionFruit;
+        Vector newPosition, positionPlayer, positionFruit;
 
         Queue<Rectangle> rectRec = new Queue<Rectangle>();
         Queue<Vector> rectVecs = new Queue<Vector>();
-
-        Rectangle rect = new Rectangle()                                //creates a Prefab for the Tail of the Snake
-        {
-            Width = 30,
-            Height = 30,
-            Fill = Brushes.LimeGreen,
-        };
 
         public MainWindow()
         {
@@ -52,10 +40,10 @@ namespace Snake2._0
             positionFruit = new Vector(Grid.GetRow(Fruit), Grid.GetColumn(Fruit));
 
             timerOfTime += timeSpeed;
-            int qoutient = Math.DivRem((int)timerOfTime, 60, out int remainder);
+            int qoutient = Math.DivRem((int)timerOfTime, 60, out int remainder);             // changing Timer by determining Minutes and Seconds
             if(remainder < 10)
             {
-                remainderText = "0" +remainder.ToString();
+                remainderText = "0" + remainder.ToString();
             }
             else
             {
@@ -77,9 +65,9 @@ namespace Snake2._0
         }
 
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)             //KeyDown event for controls
+        private void Window_KeyDown(object sender, KeyEventArgs e)             //KeyDown event for controls called when a key is pressed
         {
-            if ((e.Key == Key.W || e.Key == Key.Up) && directionPlayer != Direction.Down && directionOld != Direction.Down)
+            if ((e.Key == Key.W || e.Key == Key.Up) && directionPlayer != Direction.Down && directionOld != Direction.Down)                 // Direction contols
             {
                 directionPlayer = Direction.Up;
             }
@@ -95,14 +83,14 @@ namespace Snake2._0
             {
                 directionPlayer = Direction.Right;
             }
-            else if(e.Key == Key.Space)
+            else if(e.Key == Key.Space)                                          // Start Control
             {
                 if(!alreadyPlaying)
                 {
                     StartGame();
                 }
             }
-            else if(e.Key == Key.D1 || e.Key == Key.NumPad1)
+            else if(e.Key == Key.D1 || e.Key == Key.NumPad1)                       // Mode control
             {
                 if(!alreadyPlaying)
                 {
@@ -131,14 +119,14 @@ namespace Snake2._0
             }
         }
 
-        private void Movement()                                      //used for ´moving the head of the snake and checking for the collision with other gameobjects
+        private void Movement()                                      //used for ´moving the head of the snake and checking for the collision with other gameobjects called every Frame
         {
-            if (CheckSpawn(positionPlayer))
+            if (CheckSpawn(positionPlayer))                           // checking if head collided with body
             {
                 EndGame();
                 return;
             }
-            else if (positionPlayer == positionFruit)
+            else if (positionPlayer == positionFruit)                     // checking if Fruit was collected
             {
                 do
                 {
@@ -153,7 +141,7 @@ namespace Snake2._0
                 Score.Content = "Score: " + scoreValue;
             }
 
-            switch (directionPlayer)
+            switch (directionPlayer)                                       // moving the player in the direction that was determined in keydownEvent and checking if head collided with the Walls
             {
                 case Direction.Up:
                     if (positionPlayer.X - 1 >= 0)
@@ -192,27 +180,27 @@ namespace Snake2._0
 
         private void SpawnTail()                                                    //used to render the tail of the snake
         {
-            Rectangle rect = new Rectangle
+            Rectangle rect = new Rectangle               // creating a prefab for the snake body
             {
                 Width = 30,
                 Height = 30,
                 Fill = Brushes.LightGreen
             };
 
-            grid.Children.Add(rect);
+            grid.Children.Add(rect);                          // creating a new body part
             rectRec.Enqueue(rect);
             Grid.SetRow(rect, (int)positionPlayer.X);
             Grid.SetColumn(rect, (int)positionPlayer.Y);
             rectVecs.Enqueue(positionPlayer);
 
-            if (rectRec.Count > snakeLength)
+            if (rectRec.Count > snakeLength)                  // deleting a body part if the body is too long
             {
                 grid.Children.Remove(rectRec.Dequeue());
                 rectVecs.Dequeue();
             }
         }
 
-        private bool CheckSpawn(Vector positionToCheck)                              //checking if one of the tailparts is on the positionToCheck Vector2
+        private bool CheckSpawn(Vector positionToCheck)                              //checking if one of the body parts is on the positionToCheck Vector2
         {
             bool check = false;
             foreach(Vector vector in rectVecs)
